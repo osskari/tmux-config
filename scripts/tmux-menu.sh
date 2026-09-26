@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 
-{
-	tmux list-sessions -F '#S' | grep -v '^_popup_' | while read -r session; do
-		echo "SESSION:$session"
-		tmux list-windows -t "$session" -F 'WINDOW:#S:#I #W'
-	done
-} | sed 's/^SESSION:/▼ /' | sed 's/^WINDOW:/  ⦿ /' |
-	fzf --reverse |
-	awk '{
-  if ($1 == "▼") {
-    print $2
-  } else if ($1 == "⦿") {
-    print $2
-  }
-}' |
-	xargs tmux switch-client -t
+entries() {
+  tmux list-windows -a -F '#{session_name}:#{window_index}	#{session_name}›#{window_name}'
+}
+
+selection="$(entries | fzf \
+  --delimiter=$'\t' \
+  --with-nth=2 \
+  --no-multi \
+  --reverse \
+  --prompt='  ' \
+  --pointer='▸' \
+  --info=inline)"
+
+# Escape / no match — leave the client exactly where it was.
+[[ -z "$selection" ]] && exit 0
+
+target="${selection%%$'\t'*}"
+
+tmux switch-client -t "${target%%:*}"
+tmux select-window -t "$target"
