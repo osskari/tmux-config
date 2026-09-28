@@ -24,3 +24,17 @@ if [ ! -d "$CPU_DIR/.git" ]; then
 else
   echo 'Cpu widget already installed'
 fi
+
+# uptime widget
+UPTIME_DIR="$PLUGINS_DIR/uptime"
+
+if [ ! -d "$UPTIME_DIR" ]; then
+  echo 'Installing uptime widget'
+
+  mkdir -p "$UPTIME_DIR"
+  git clone https://github.com/lagunagfx/tmux-uptime "$UPTIME_DIR"
+
+  echo 'Uptime widget installed'
+else
+  echo 'Uptime widget already installed'
+fi
